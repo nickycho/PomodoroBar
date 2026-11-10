@@ -7,8 +7,10 @@ class FullScreenWindowController {
     private var localMonitor: Any?
     private var isDismissing = false
     private let onDismiss: () -> Void
+    private let languageManager: LanguageManager
 
-    init(completedPhase: TimerPhase, onDismiss: @escaping () -> Void) {
+    init(completedPhase: TimerPhase, languageManager: LanguageManager, onDismiss: @escaping () -> Void) {
+        self.languageManager = languageManager
         self.onDismiss = onDismiss
 
         for screen in NSScreen.screens {
@@ -24,7 +26,7 @@ class FullScreenWindowController {
             window.backgroundColor = .clear
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             window.contentView = NSHostingView(
-                rootView: FullScreenOverlayView(completedPhase: completedPhase)
+                rootView: FullScreenOverlayView(completedPhase: completedPhase, languageManager: languageManager)
             )
             windows.append(window)
         }

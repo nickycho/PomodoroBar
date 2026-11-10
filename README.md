@@ -12,6 +12,7 @@ A lightweight native Pomodoro timer that lives in the macOS menu bar.
 - Dismiss the completion overlay with any click or key press.
 - Optionally start the next phase automatically after dismissing the overlay.
 - Keep timer preferences locally in macOS `UserDefaults`.
+- Use the interface in English, Traditional Chinese, Japanese, or Korean, with system language detection and a persistent language preference.
 
 ## Requirements
 
@@ -38,5 +39,6 @@ Click the menu bar item to open the timer and settings. Use **Quit** in the popo
 ## Notes
 
 - The app has no third-party package dependencies.
-- The app interface is currently in Traditional Chinese.
+- System language is used by default, with English as the fallback for unsupported languages.
+- Select a language from the settings panel to override the system language.
 - Starting the app automatically at login is not currently supported.

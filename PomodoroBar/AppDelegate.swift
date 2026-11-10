@@ -6,6 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private let timerManager = TimerManager()
+    private let languageManager = LanguageManager()
     private var fullScreenController: FullScreenWindowController?
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
@@ -148,7 +149,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentSize = NSSize(width: 280, height: 370)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(
-            rootView: PopoverView(timerManager: timerManager)
+            rootView: PopoverView(
+                timerManager: timerManager,
+                languageManager: languageManager,
+                onSettingsVisibilityChange: { [weak self] isVisible in
+                    guard let self else { return }
+                    self.popover.contentSize = NSSize(width: 280, height: isVisible ? 520 : 370)
+                }
+            )
         )
     }
 
@@ -184,6 +192,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let completedPhase = timerManager.phase
         fullScreenController = FullScreenWindowController(
             completedPhase: completedPhase,
+            languageManager: languageManager,
             onDismiss: { [weak self] in
                 guard let self else { return }
                 let next: TimerPhase = completedPhase == .work ? .shortBreak : .work

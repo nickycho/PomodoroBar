@@ -1,9 +1,11 @@
 import SwiftUI
 
-private let appVersion = "1.1.0"
+private let appVersion = "1.1.1"
 
 struct PopoverView: View {
     @ObservedObject var timerManager: TimerManager
+    @ObservedObject var languageManager: LanguageManager
+    var onSettingsVisibilityChange: ((Bool) -> Void)? = nil
     @State private var showSettings = false
 
     private var phaseColor: Color {
@@ -12,12 +14,10 @@ struct PopoverView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Phase label
-            Text(timerManager.phase == .work ? "工作時間" : "休息時間")
+            Text(languageManager.text(timerManager.phase == .work ? .workPhase : .breakPhase))
                 .font(.headline)
                 .foregroundStyle(phaseColor)
 
-            // Progress ring + time display
             ZStack {
                 Circle()
                     .stroke(Color.secondary.opacity(0.15), lineWidth: 10)
@@ -35,22 +35,22 @@ struct PopoverView: View {
             }
             .frame(width: 150, height: 150)
 
-            // Control buttons
             HStack(spacing: 12) {
                 if timerManager.state == .running {
-                    Button("暫停") { timerManager.pause() }
+                    Button(languageManager.text(.pause)) { timerManager.pause() }
                         .buttonStyle(.bordered)
                 } else {
-                    Button("開始") { timerManager.start() }
+                    Button(languageManager.text(.start)) { timerManager.start() }
                         .buttonStyle(.borderedProminent)
                         .tint(phaseColor)
                 }
 
-                Button("重置") { timerManager.reset() }
+                Button(languageManager.text(.reset)) { timerManager.reset() }
                     .buttonStyle(.bordered)
 
                 let nextPhase: TimerPhase = timerManager.phase == .work ? .shortBreak : .work
-                Button(timerManager.phase == .work ? "休息" : "工作") {
+                let nextPhaseLabel: AppTextKey = timerManager.phase == .work ? .switchToBreak : .switchToWork
+                Button(languageManager.text(nextPhaseLabel)) {
                     timerManager.switchPhase(to: nextPhase)
                     timerManager.start()
                 }
@@ -59,16 +59,16 @@ struct PopoverView: View {
 
             Divider()
 
-            // Settings toggle + Quit
             HStack {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showSettings.toggle()
+                        onSettingsVisibilityChange?(showSettings)
                     }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "gearshape")
-                        Text(showSettings ? "隱藏設定" : "設定")
+                        Text(languageManager.text(showSettings ? .hideSettings : .settings))
                     }
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -82,7 +82,7 @@ struct PopoverView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "power")
-                        Text("離開")
+                        Text(languageManager.text(.quit))
                     }
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -94,9 +94,8 @@ struct PopoverView: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
 
-            // Expandable settings panel
             if showSettings {
-                SettingsView(timerManager: timerManager)
+                SettingsView(timerManager: timerManager, languageManager: languageManager)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }

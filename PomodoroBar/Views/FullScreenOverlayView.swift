@@ -2,13 +2,14 @@ import SwiftUI
 
 struct FullScreenOverlayView: View {
     let completedPhase: TimerPhase
+    @ObservedObject var languageManager: LanguageManager
 
     private var title: String {
-        completedPhase == .work ? "工作時間結束！" : "休息時間結束！"
+        languageManager.text(completedPhase == .work ? .workCompleteTitle : .breakCompleteTitle)
     }
 
     private var subtitle: String {
-        completedPhase == .work ? "好好休息一下" : "準備開始工作"
+        languageManager.text(completedPhase == .work ? .workCompleteSubtitle : .breakCompleteSubtitle)
     }
 
     private var accentColor: Color {
@@ -17,12 +18,10 @@ struct FullScreenOverlayView: View {
 
     var body: some View {
         ZStack {
-            // Full-screen blur background
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()
 
-            // Center card
             VStack(spacing: 16) {
                 Image(systemName: completedPhase == .work ? "cup.and.saucer.fill" : "flame.fill")
                     .font(.system(size: 56))
@@ -35,7 +34,7 @@ struct FullScreenOverlayView: View {
                     .font(.title2)
                     .foregroundStyle(.secondary)
 
-                Text("點擊任意處或按任意鍵繼續")
+                Text(languageManager.text(.dismissOverlay))
                     .font(.callout)
                     .foregroundStyle(.tertiary)
                     .padding(.top, 12)
