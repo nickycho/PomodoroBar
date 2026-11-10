@@ -47,20 +47,99 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateTitle() {
-        let icon = timerManager.phase == .work ? "🍅" : "☕️"
         let time = timerManager.state == .idle ? "" : timerManager.timeString
-        let combined = time.isEmpty ? "\(icon) " : "\(icon) \(time)"
 
-        // 字串沒變就不更新 status bar，避免 AppKit 重排版/重繪
-        if combined == lastTitleString { return }
-        lastTitleString = combined
+        // Skip redundant AppKit updates to avoid unnecessary status bar redraws.
+        if time == lastTitleString { return }
+        lastTitleString = time
 
-        let attributed = NSMutableAttributedString(string: "\(icon) ")
+        statusItem.button?.image = Self.tomatoTimerMenuBarImage
+        statusItem.button?.imagePosition = .imageLeading
+
+        let attributed = NSMutableAttributedString(string: "")
         if !time.isEmpty {
             attributed.append(NSAttributedString(string: time, attributes: Self.monoDigitAttributes))
         }
         statusItem.button?.attributedTitle = attributed
     }
+
+
+    private static let tomatoTimerMenuBarImage: NSImage = {
+        let image = NSImage(size: NSSize(width: 18, height: 18))
+        image.lockFocus()
+        NSColor.white.setStroke()
+
+        let body = NSBezierPath()
+        body.move(to: NSPoint(x: 9, y: 13.5))
+        body.curve(to: NSPoint(x: 15.5, y: 11.5),
+                   controlPoint1: NSPoint(x: 11.5, y: 14.7),
+                   controlPoint2: NSPoint(x: 14.6, y: 13.5))
+        body.curve(to: NSPoint(x: 16.2, y: 7),
+                   controlPoint1: NSPoint(x: 16.5, y: 10.5),
+                   controlPoint2: NSPoint(x: 16.5, y: 8.5))
+        body.curve(to: NSPoint(x: 12.2, y: 2.8),
+                   controlPoint1: NSPoint(x: 15.5, y: 4.8),
+                   controlPoint2: NSPoint(x: 14.1, y: 3.2))
+        body.curve(to: NSPoint(x: 9, y: 3.8),
+                   controlPoint1: NSPoint(x: 11.1, y: 2.4),
+                   controlPoint2: NSPoint(x: 10, y: 3.5))
+        body.curve(to: NSPoint(x: 5.8, y: 2.8),
+                   controlPoint1: NSPoint(x: 8, y: 3.5),
+                   controlPoint2: NSPoint(x: 6.9, y: 2.4))
+        body.curve(to: NSPoint(x: 1.8, y: 7),
+                   controlPoint1: NSPoint(x: 3.9, y: 3.2),
+                   controlPoint2: NSPoint(x: 2.4, y: 4.8))
+        body.curve(to: NSPoint(x: 2.5, y: 11.5),
+                   controlPoint1: NSPoint(x: 1.4, y: 8.5),
+                   controlPoint2: NSPoint(x: 1.7, y: 10.5))
+        body.curve(to: NSPoint(x: 9, y: 13.5),
+                   controlPoint1: NSPoint(x: 4.4, y: 13.5),
+                   controlPoint2: NSPoint(x: 6.7, y: 14.5))
+        body.close()
+        body.lineWidth = 1.2
+        body.lineCapStyle = .round
+        body.lineJoinStyle = .round
+        body.stroke()
+
+        let crown = NSBezierPath()
+        crown.move(to: NSPoint(x: 9, y: 13.3))
+        crown.line(to: NSPoint(x: 6.2, y: 16.1))
+        crown.line(to: NSPoint(x: 8.7, y: 15.3))
+        crown.line(to: NSPoint(x: 9.2, y: 17))
+        crown.line(to: NSPoint(x: 10, y: 15.3))
+        crown.line(to: NSPoint(x: 12.2, y: 16))
+        crown.line(to: NSPoint(x: 10.8, y: 13.3))
+        crown.lineWidth = 1.2
+        crown.lineCapStyle = .round
+        crown.lineJoinStyle = .round
+        crown.stroke()
+
+        let dialArc = NSBezierPath()
+        dialArc.move(to: NSPoint(x: 2.7, y: 6.8))
+        dialArc.curve(to: NSPoint(x: 15.3, y: 6.8),
+                      controlPoint1: NSPoint(x: 6, y: 4.8),
+                      controlPoint2: NSPoint(x: 12, y: 4.8))
+        dialArc.lineWidth = 1
+        dialArc.lineCapStyle = .round
+        dialArc.stroke()
+
+        let ticks = NSBezierPath()
+        let tickPositions: [(CGFloat, CGFloat)] = [
+            (4.2, 7.1), (6.3, 7.8), (9, 8.1),
+            (11.7, 7.8), (13.8, 7.1)
+        ]
+        for (x, y) in tickPositions {
+            ticks.move(to: NSPoint(x: x, y: 6.8))
+            ticks.line(to: NSPoint(x: x, y: y))
+        }
+        ticks.lineWidth = 1
+        ticks.lineCapStyle = .round
+        ticks.stroke()
+
+        image.unlockFocus()
+        image.isTemplate = true
+        return image
+    }()
 
     // MARK: - Popover
 
